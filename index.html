@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>مغامرة قندس ورمزي 🐰🐈‍⬛</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Tajawal', sans-serif; background: #1a0a12; overflow: hidden; height: 100vh; color: #fff; }
+  #game-container { width: 100%; height: 100%; position: relative; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .screen {
+    position: absolute; inset: 0; display: none; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 24px; z-index: 30;
+    background: linear-gradient(160deg, #ff9ec7 0%, #ff6b9d 45%, #c44569 100%);
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  .float-item {
+    position: absolute; pointer-events: none;
+    animation: floatAround 12s linear infinite; opacity: 0.7; font-size: 22px;
+  }
+  @keyframes floatAround {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+  }
+
+  .title { font-size: 2.5rem; font-weight: 800; margin-bottom: 12px; text-shadow: 0 4px 18px rgba(0,0,0,0.25); }
+  .subtitle { font-size: 1.2rem; line-height: 1.75; max-width: 420px; margin-bottom: 28px; }
+
+  .btn {
+    background: #fff; color: #c44569; border: none; padding: 16px 44px;
+    font-size: 1.2rem; font-family: 'Tajawal'; font-weight: 700;
+    border-radius: 50px; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    transition: all 0.25s ease; z-index: 5;
+  }
+  .btn:hover { transform: translateY(-3px) scale(1.03); }
+
+  .ramzi-mascot {
+    position: absolute; bottom: 24px; left: 24px;
+    background: rgba(255,255,255,0.97); color: #5a2a3a;
+    padding: 16px 20px; border-radius: 22px 22px 22px 6px;
+    font-size: 1.05rem; max-width: 260px; line-height: 1.5;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    display: flex; gap: 12px; align-items: flex-start; z-index: 40;
+  }
+  .ramzi-mascot .cat { font-size: 34px; }
+
+  .big-dialog {
+    position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%);
+    background: white; color: #5a2a3a;
+    padding: 20px 28px; border-radius: 24px;
+    font-size: 1.25rem; font-weight: 700; line-height: 1.5;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    max-width: 340px; z-index: 60; display: none; text-align: center;
+  }
+  .big-dialog.show { display: block; animation: pop 0.35s ease; }
+  @keyframes pop {
+    from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
+  }
+
+  .quiz-box {
+    background: #fff; color: #4a2a3a; border-radius: 24px;
+    padding: 30px 26px; max-width: 480px; width: 100%;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.15); z-index: 5;
+  }
+  .progress { font-size: 0.95rem; color: #c44569; margin-bottom: 12px; font-weight: 600; }
+  .question { font-size: 1.3rem; font-weight: 700; margin-bottom: 22px; line-height: 1.55; }
+  .option {
+    background: #fff5f8; border: 2px solid #ffc0d0; padding: 15px 18px;
+    border-radius: 16px; margin-bottom: 12px; cursor: pointer;
+    font-size: 1.1rem; transition: 0.2s; text-align: right;
+  }
+  .option:hover { background: #ffe8ef; border-color: #ff6b9d; transform: translateX(-5px); }
+  .comment {
+    margin-top: 18px; padding: 14px 18px; background: #fff0f5;
+    border-radius: 16px; font-size: 1.05rem; line-height: 1.55; color: #6b3a4a;
+    display: none;
+  }
+  .comment.show { display: block; }
+
+  .garden {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; max-width: 420px; margin: 20px 0; z-index: 5;
+  }
+  .item {
+    background: rgba(255,255,255,0.95); border-radius: 16px;
+    padding: 16px 8px; font-size: 1.9rem; cursor: pointer;
+    transition: 0.2s; color: #4a2a3a;
+  }
+  .item:hover { transform: scale(1.08); background: #fff; }
+
+  .heart-field { position: relative; width: 100%; height: 52vh; max-width: 480px; }
+  .floating-heart {
+    position: absolute; font-size: 32px; cursor: pointer;
+    transition: 0.3s; animation: floaty 2.8s ease-in-out infinite;
+  }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+
+  .counter { font-size: 1.4rem; font-weight: 700; margin-bottom: 14px; z-index: 5; }
+  .controls-hint {
+    position: absolute; bottom: 14px; left: 0; right: 0;
+    text-align: center; font-size: 0.88rem; color: rgba(255,255,255,0.8); z-index: 5;
+  }
+
+  #after-hug {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; justify-content: center; align-items: center;
+    background: rgba(0,0,0,0.45); z-index: 50;
+  }
+  #after-hug.active { display: flex; }
+  #after-hug .msg {
+    background: white; color: #c44569;
+    padding: 24px 40px; border-radius: 24px;
+    font-size: 1.4rem; font-weight: 700;
+    margin-bottom: 28px; box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    max-width: 360px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="c"></canvas>
+
+  <div id="after-hug">
+    <div class="msg">ياي أخيرًا إنتي هنا<br>وحشتيني ❤️</div>
+    <button class="btn" onclick="goToChessFromHug()">استمري →</button>
+  </div>
+
+  <!-- START -->
+  <div class="screen active" id="start">
+    <div class="float-decor"></div>
+    <div style="font-size:64px;margin-bottom:14px;z-index:5">🐰 ❤️ 🐈‍⬛</div>
+    <h1 class="title">قندس... جاهزة؟ 😏</h1>
+    <p class="subtitle">
+      ساعدي قندس تلاقي حبها الحقيقي<br>
+      عندج مغامرة كاملة من عدة ألعاب<br>
+      وفي الآخر مفاجأة حلوة من رمزي
+    </p>
+    <button class="btn" onclick="startGame()">يلا نبدأ المغامرة 💗</button>
+    <div class="ramzi-mascot">
+      <div class="cat">🐈‍⬛</div>
+      <div>مرحبا يا قندس... اليوم اللعبة كلها لج ❤️</div>
+    </div>
+  </div>
+
+  <!-- TRANSITION 1 -->
+  <div class="screen" id="trans1">
+    <div class="float-decor"></div>
+    <div style="font-size:58px;margin-bottom:10px;z-index:5">🐈‍⬛</div>
+    <div class="ramzi-mascot" style="position:static;margin-bottom:20px;max-width:360px">
+      <div class="cat">🐈‍⬛</div>
+      <div>أخيرًا وصلتي يا بعدي!<br>كنت مستنيك من زمان 😭<br>الحين نلعب شيء ثاني...</div>
+    </div>
+    <button class="btn" onclick="goChess()">استمري →</button>
+  </div>
+
+  <!-- CHESS -->
+  <div class="screen" id="chess">
+    <div class="float-decor"></div>
+    <div class="ramzi-mascot">
+      <div class="cat">🐈‍⬛</div>
+      <div id="chess-talk">نشوف الحين تعرفين شطرنج ولا بس تسوين فيها 😂</div>
+    </div>
+    <div class="big-dialog" id="big-dialog"></div>
+    <div class="garden" id="garden"></div>
+    <p id="chess-inst" style="margin-top:14px;font-size:1.15rem;font-weight:600;z-index:5"></p>
+  </div>
+
+  <!-- TRANSITION 2 -->
+  <div class="screen" id="trans2">
+    <div class="float-decor"></div>
+    <div class="ramzi-mascot" style="position:static;margin-bottom:20px;max-width:360px">
+      <div class="cat">🐈‍⬛</div>
+      <div>أوكي الشطرنج خلص.<br>الحين نشوف إذا تعرفين رمزي صدق ولا لا 😼</div>
+    </div>
+    <button class="btn" onclick="startQuiz()">استمري →</button>
+  </div>
+
+  <!-- QUIZ INTRO -->
+  <div class="screen" id="q-intro">
+    <div class="float-decor"></div>
+    <div class="ramzi-mascot" style="position:static;margin-bottom:20px;max-width:360px">
+      <div class="cat">🐈‍⬛</div>
+      <div id="q-intro-text"></div>
+    </div>
+    <button class="btn" onclick="beginLevel()">يلا →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quiz">
+    <div class="float-decor"></div>
+    <div class="quiz-box">
+      <div class="progress" id="q-prog"></div>
+      <div class="question" id="q-text"></div>
+      <div id="q-opts"></div>
+      <div class="comment" id="q-comment"></div>
+      <button class="btn" id="q-next" style="display:none;margin-top:18px" onclick="nextQ()">التالي →</button>
+    </div>
+  </div>
+
+  <!-- HEARTS -->
+  <div class="screen" id="hearts">
+    <div class="float-decor"></div>
+    <div class="ramzi-mascot" style="position:static;margin-bottom:16px;max-width:340px">
+      <div class="cat">🐈‍⬛</div>
+      <div>خلصتي كل الألعاب...<br>باقي شيء واحد بس ❤️</div>
+    </div>
+    <div class="counter" id="h-count">قلوب: 0 / 10</div>
+    <div class="heart-field" id="h-field"></div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="screen" id="final">
+    <div class="float-decor"></div>
+    <div style="font-size:70px;margin-bottom:8px;z-index:5">🐰 🤗 🐈‍⬛</div>
+    <h1 class="title" style="font-size:2.1rem">قلبي</h1>
+    <div class="ramzi-mascot" style="position:static;max-width:380px;margin:18px 0">
+      <div class="cat">🐈‍⬛</div>
+      <div style="font-size:1.15rem;line-height:1.6">
+        خلصتي كل القلوب...<br><br>
+        بس إنتي اللي ماسكة قلبي<br>
+        وهذا أهم شيء ❤️
+      </div>
+    </div>
+    <p style="margin-top:18px;font-size:1.25rem;font-weight:600;z-index:5">أحبك يا قندس 🐰</p>
+  </div>
+
+  <div class="controls-hint" id="hint" style="display:none">
+    A / D أو ← → للحركة &nbsp;|&nbsp; W أو مسافة للقفز &nbsp;|&nbsp; S للانحناء
+  </div>
+</div>
+
+<script>
+function createFloats() {
+  document.querySelectorAll('.float-decor').forEach(container => {
+    container.innerHTML = '';
+    const items = ['💖','✨','🦋','⭐','💕','🌸','💗','🌟'];
+    for (let i = 0; i < 14; i++) {
+      const el = document.createElement('div');
+      el.className = 'float-item';
+      el.textContent = items[Math.floor(Math.random()*items.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.animationDuration = (9 + Math.random()*10) + 's';
+      el.style.animationDelay = Math.random()*8 + 's';
+      el.style.fontSize = (16 + Math.random()*14) + 'px';
+      container.appendChild(el);
+    }
+  });
+}
+createFloats();
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, keys = {}, cam = 0;
+let state = 'start';
+
+const player = {
+  x: 140, y: 0, w: 48,
+  standH: 62, crouchH: 38, h: 62,
+  vx: 0, vy: 0, speed: 4.6, jump: -13.8,
+  grounded: false, crouching: false, face: 1
+};
+
+const levels = [
+  { name: 'الغابة', w: 3400,
+    obs: [
+      {x:480,y:0,w:78,h:34,t:'g'}, {x:860,y:0,w:90,h:38,t:'g'},
+      {x:1280,y:-70,w:170,h:18,t:'o'}, {x:1720,y:0,w:82,h:32,t:'g'},
+      {x:2180,y:-68,w:180,h:18,t:'o'}, {x:2680,y:0,w:95,h:36,t:'g'}
+    ], door: 3150 },
+  { name: 'البيت المهجور', w: 3000,
+    obs: [
+      {x:420,y:0,w:85,h:36,t:'g'}, {x:780,y:-66,w:155,h:18,t:'o'},
+      {x:1180,y:0,w:92,h:40,t:'g'}, {x:1620,y:-68,w:165,h:18,t:'o'},
+      {x:2100,y:0,w:80,h:34,t:'g'}, {x:2500,y:-64,w:150,h:18,t:'o'}
+    ], door: 2800 },
+  { name: 'الطريق الخارجي', w: 3200,
+    obs: [
+      {x:380,y:0,w:70,h:32,t:'g'}, {x:700,y:-68,w:145,h:18,t:'o'},
+      {x:1080,y:0,w:85,h:38,t:'g'}, {x:1500,y:-70,w:160,h:18,t:'o'},
+      {x:1980,y:0,w:75,h:34,t:'g'}, {x:2400,y:-66,w:155,h:18,t:'o'},
+      {x:2800,y:0,w:90,h:36,t:'g'}
+    ], door: 3000 },
+  { name: 'المكان الأخير', w: 2000, obs: [], door: null, final: true }
+];
+
+let lvl = 0, L = levels[0];
+let ramziX = 1450, phase = 0, timer = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  levels.forEach(l => l.gy = H - 92);
+}
+window.addEventListener('resize', resize);
+resize();
+
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if ([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+function drawRabbit(x, y, crouch, face) {
+  ctx.save();
+  ctx.translate(x + 24, y + player.h);
+  if (face < 0) ctx.scale(-1, 1);
+  const bodyH = crouch ? 18 : 26;
+  const headY = crouch ? -32 : -48;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(0, 2, 18, 5, 0, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#f5e6d8';
+  ctx.beginPath();
+  ctx.ellipse(-10, -5, 9, 6, 0, 0, Math.PI*2);
+  ctx.ellipse(10, -5, 9, 6, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = '#faf0e6';
+  ctx.beginPath();
+  ctx.ellipse(0, -bodyH/2 - 3, 18, bodyH/2 + 3, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.beginPath(); ctx.arc(0, headY, 16, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#faf0e6';
+  ctx.beginPath();
+  ctx.ellipse(-9, headY - 20, 6.5, 16, -0.25, 0, Math.PI*2);
+  ctx.ellipse(9, headY - 20, 6.5, 16, 0.25, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#ffb7c5';
+  ctx.beginPath();
+  ctx.ellipse(-9, headY - 20, 3.2, 10, -0.25, 0, Math.PI*2);
+  ctx.ellipse(9, headY - 20, 3.2, 10, 0.25, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = '#2a1a1a';
+  ctx.beginPath();
+  ctx.arc(-6, headY - 2, 2.6, 0, Math.PI*2);
+  ctx.arc(6, headY - 2, 2.6, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-5.2, headY - 2.8, 1, 0, Math.PI*2);
+  ctx.arc(6.8, headY - 2.8, 1, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ff8fa3';
+  ctx.beginPath(); ctx.arc(0, headY + 4.5, 2.2, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,150,170,0.4)';
+  ctx.beginPath();
+  ctx.arc(-10, headY + 3, 3.5, 0, Math.PI*2);
+  ctx.arc(10, headY + 3, 3.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawCat(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 8; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(18, -26);
+  ctx.quadraticCurveTo(45, -52, 38, -74);
+  ctx.stroke();
+
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath(); ctx.ellipse(0, -30, 20, 24, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -58, 17, 0, Math.PI*2); ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(-14, -70); ctx.lineTo(-8, -90); ctx.lineTo(-2, -70);
+  ctx.moveTo(14, -70); ctx.lineTo(8, -90); ctx.lineTo(2, -70);
+  ctx.fill();
+
+  ctx.fillStyle = '#9aff00';
+  ctx.beginPath();
+  ctx.ellipse(-6.5, -60, 4, 5, 0, 0, Math.PI*2);
+  ctx.ellipse(6.5, -60, 4, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#111';
+  ctx.beginPath();
+  ctx.arc(-6.5, -60, 1.8, 0, Math.PI*2);
+  ctx.arc(6.5, -60, 1.8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBG() {
+  if (lvl === 0) {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, '#7ec8e3'); g.addColorStop(0.55, '#a8e0a0'); g.addColorStop(1, '#3d8b4a');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    for (let i = 0; i < 16; i++) {
+      const tx = ((i * 240) - cam * 0.35) % (W + 180) - 90;
+      ctx.fillStyle = '#5c3a21'; ctx.fillRect(tx + 28, H - 300, 26, 210);
+      ctx.fillStyle = '#2e8b3a';
+      ctx.beginPath();
+      ctx.arc(tx + 41, H - 310, 58, 0, Math.PI*2);
+      ctx.arc(tx + 12, H - 275, 42, 0, Math.PI*2);
+      ctx.arc(tx + 68, H - 275, 42, 0, Math.PI*2);
+      ctx.fill();
+    }
+  } else if (lvl === 1) {
+    ctx.fillStyle = '#3c2a1e'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#4a3426'; ctx.fillRect(0,0,W,H-92);
+    ctx.fillStyle = '#5e4030'; ctx.fillRect(0,H-92,W,92);
+    ctx.strokeStyle = '#3a281c'; ctx.lineWidth = 2;
+    for (let i = 0; i < 25; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i*70 - (cam%70), H-92);
+      ctx.lineTo(i*70 - (cam%70), H);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(255,230,180,0.35)';
+    ctx.fillRect(W*0.5 - 80, 60, 160, 110);
+    ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 8;
+    ctx.strokeRect(W*0.5 - 80, 60, 160, 110);
+  } else if (lvl === 2) {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, '#ff9a8b'); g.addColorStop(0.45, '#ff6b9d'); g.addColorStop(1, '#4a2a4a');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  } else {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, '#ffc2d4'); g.addColorStop(0.5, '#ff8fab'); g.addColorStop(1, '#c44569');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    const glow = ctx.createRadialGradient(W/2, H*0.42, 30, W/2, H*0.42, 420);
+    glow.addColorStop(0, 'rgba(255,255,255,0.3)');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    for (let i = 0; i < 18; i++) {
+      const px = (i * 97 + Date.now() * 0.02) % (W + 50);
+      const py = (i * 61 + Date.now() * 0.013) % H;
+      ctx.beginPath(); ctx.arc(px, py, 3.5, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  ctx.fillStyle = lvl === 1 ? '#5e4030' : lvl === 3 ? '#6b4a6b' : '#3d7a42';
+  ctx.fillRect(0, L.gy, W, 92);
+}
+
+function update() {
+  if (keys['a'] || keys['arrowleft']) { player.vx -= 0.65; player.face = -1; }
+  else if (keys['d'] || keys['arrowright']) { player.vx += 0.65; player.face = 1; }
+  else player.vx *= 0.8;
+  player.vx = Math.max(-player.speed, Math.min(player.speed, player.vx));
+
+  if ((keys['w'] || keys[' '] || keys['arrowup']) && player.grounded && !player.crouching) {
+    player.vy = player.jump; player.grounded = false;
+  }
+
+  const wantCrouch = keys['s'] || keys['arrowdown'];
+  if (wantCrouch && player.grounded) {
+    player.crouching = true; player.h = player.crouchH;
+  } else if (!wantCrouch && player.crouching) {
+    let canStand = true;
+    const testTop = player.y + player.h - player.standH;
+    for (const o of L.obs) {
+      if (o.t !== 'o') continue;
+      const oy = L.gy + o.y;
+      if (player.x < o.x + o.w && player.x + player.w > o.x &&
+          testTop < oy + o.h && player.y + player.h > oy) {
+        canStand = false; break;
+      }
+    }
+    if (canStand) {
+      player.crouching = false; player.h = player.standH;
+      player.y = L.gy - player.h;
+    }
+  }
+
+  player.vy += 0.58;
+  if (player.vy > 15) player.vy = 15;
+  player.x += player.vx;
+  player.y += player.vy;
+
+  if (player.y + player.h > L.gy) {
+    player.y = L.gy - player.h; player.vy = 0; player.grounded = true;
+  } else player.grounded = false;
+
+  for (const o of L.obs) {
+    const ox = o.x, ow = o.w, oh = o.h;
+    const oy = o.t === 'g' ? L.gy - oh : L.gy + o.y;
+
+    if (player.x < ox + ow && player.x + player.w > ox &&
+        player.y < oy + oh && player.y + player.h > oy) {
+      if (o.t === 'g') {
+        if (player.vy >= 0 && (player.y + player.h - player.vy) <= oy + 12) {
+          player.y = oy - player.h; player.vy = 0; player.grounded = true;
+        } else {
+          if (player.vx > 0) player.x = ox - player.w;
+          else if (player.vx < 0) player.x = ox + ow;
+          player.vx = 0;
+        }
+      } else {
+        if (player.y < oy + oh) {
+          if (player.vy < 0) { player.y = oy + oh; player.vy = 0; }
+          else {
+            if (player.vx > 0) player.x = ox - player.w;
+            else if (player.vx < 0) player.x = ox + ow;
+            player.vx = 0;
+          }
+        }
+      }
+    }
+  }
+
+  if (L.door && player.x > L.door - 50) {
+    if (lvl < 3) {
+      lvl++;
+      L = levels[lvl];
+      player.x = 130;
+      player.y = L.gy - player.h;
+      player.vx = 0;
+      cam = 0;
+      phase = 0;
+      timer = 0;
+    }
+  }
+
+  if (L.final) {
+    if (player.x > 1000 && phase === 0) phase = 1;
+    if (phase === 1) {
+      if (player.x < ramziX - 80) {
+        player.vx = 2.0; player.face = 1;
+      } else {
+        player.vx = 0;
+        phase = 2;
+        timer = 0;
+      }
+    }
+    if (phase === 2) {
+      timer++;
+      if (timer > 180) {
+        phase = 3;
+        document.getElementById('after-hug').classList.add('active');
+        document.getElementById('hint').style.display = 'none';
+      }
+    }
+  }
+
+  cam = player.x - W * 0.38;
+  if (cam < 0) cam = 0;
+  if (cam > L.w - W) cam = Math.max(0, L.w - W);
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  drawBG();
+
+  L.obs.forEach(o => {
+    const ox = o.x - cam;
+    const oy = o.t === 'g' ? L.gy - o.h : L.gy + o.y;
+    if (o.t === 'g') {
+      ctx.fillStyle = '#6b4a32';
+      ctx.beginPath(); ctx.roundRect(ox, oy, o.w, o.h, 6); ctx.fill();
+      ctx.fillStyle = '#7d5a3e'; ctx.fillRect(ox, oy, o.w, 7);
+    } else {
+      ctx.fillStyle = '#5a3e28'; ctx.fillRect(ox, oy, o.w, o.h);
+      ctx.fillStyle = '#2e8b3a';
+      ctx.beginPath(); ctx.ellipse(ox + o.w/2, oy - 5, o.w/2 + 10, 11, 0, 0, Math.PI*2); ctx.fill();
+    }
+  });
+
+  if (L.door) {
+    ctx.fillStyle = '#2c1a0e';
+    ctx.fillRect(L.door - cam, L.gy - 115, 70, 115);
+    ctx.fillStyle = '#c9a227';
+    ctx.beginPath(); ctx.arc(L.door - cam + 53, L.gy - 55, 5, 0, Math.PI*2); ctx.fill();
+  }
+
+  drawRabbit(player.x - cam, player.y, player.crouching, player.face);
+
+  if (L.final) {
+    drawCat(ramziX - cam, L.gy);
+
+    if (phase >= 2) {
+      ctx.font = '28px serif';
+      for (let i = 0; i < 14; i++) {
+        const a = timer * 0.07 + i * 0.5;
+        const hx = (player.x + ramziX)/2 - cam + Math.cos(a) * (55 + i*4);
+        const hy = L.gy - 115 + Math.sin(a) * 45;
+        ctx.fillText(i % 3 === 0 ? '💖' : (i % 3 === 1 ? '💕' : '💗'), hx, hy);
+      }
+      if (timer > 50) {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 26px Tajawal';
+        ctx.textAlign = 'center';
+        ctx.fillText('ياي أخيرًا إنتي هنا', (player.x + ramziX)/2 - cam, L.gy - 195);
+        ctx.font = '22px Tajawal';
+        ctx.fillText('وحشتيني ❤️', (player.x + ramziX)/2 - cam, L.gy - 165);
+      }
+      if (timer > 110) {
+        ctx.font = '40px serif';
+        ctx.fillText('💋', (player.x + ramziX)/2 - cam, L.gy - 125);
+      }
+    }
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '16px Tajawal';
+  ctx.textAlign = 'right';
+  ctx.fillText(L.name, W - 16, 26);
+}
+
+function loop() {
+  if (state !== 'play') return;
+  update(); draw();
+  requestAnimationFrame(loop);
+}
+
+function startGame() {
+  document.getElementById('start').classList.remove('active');
+  document.getElementById('hint').style.display = 'block';
+  state = 'play';
+  lvl = 0; L = levels[0];
+  player.x = 140; player.y = L.gy - player.h;
+  player.crouching = false; player.h = player.standH;
+  requestAnimationFrame(loop);
+}
+
+function goToChessFromHug() {
+  document.getElementById('after-hug').classList.remove('active');
+  state = 'trans';
+  document.getElementById('trans1').classList.add('active');
+}
+
+// Chess
+const order = ['pawn','knight','bishop','rook'];
+let step = 0;
+
+function goChess() {
+  document.getElementById('trans1').classList.remove('active');
+  document.getElementById('chess').classList.add('active');
+  step = 0;
+  document.getElementById('big-dialog').classList.remove('show');
+  renderChess();
+}
+
+function showBigDialog(text, isCorrect) {
+  const d = document.getElementById('big-dialog');
+  d.textContent = text;
+  d.style.background = isCorrect ? '#e8ffe8' : '#fff0f5';
+  d.style.color = isCorrect ? '#2a6b2a' : '#8b3a5a';
+  d.classList.add('show');
+}
+
+function renderChess() {
+  const g = document.getElementById('garden');
+  g.innerHTML = '';
+  document.getElementById('big-dialog').classList.remove('show');
+
+  let items;
+  if (step >= order.length) {
+    items = [
+      {e:'♛ ملكة الشطرنج', id:'piece'},
+      {e:'♟️ بيدق', id:'pawn'},
+      {e:'🐈‍⬛ رمزي', id:'ramzi'},
+      {e:'🐰 قندس', id:'qandus'}
+    ];
+    document.getElementById('chess-inst').textContent = 'الحين... من هي الـ Queen؟';
+    document.getElementById('chess-talk').textContent = 'فكري زين يا قندس 👑';
+  } else {
+    items = [
+      {e:'♟️',id:'pawn'}, {e:'♞',id:'knight'}, {e:'♝',id:'bishop'}, {e:'♜',id:'rook'},
+      {e:'♛',id:'queen'}, {e:'🌹',id:'rose'}, {e:'🦋',id:'butterfly'}, {e:'🌷',id:'flower'},
+      {e:'🍃',id:'leaf'}, {e:'⭐',id:'star'}, {e:'🍓',id:'berry'}, {e:'🎀',id:'bow'}
+    ].sort(() => Math.random() - 0.5);
+    document.getElementById('chess-inst').textContent = `اضغطي على الـ ${order[step].toUpperCase()}`;
+  }
+
+  items.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.textContent = it.e;
+    d.onclick = () => {
+      if (step >= order.length) {
+        if (it.id === 'qandus') {
+          showBigDialog('إي نعم... إنتي ملكتي 👑❤️', true);
+          setTimeout(() => {
+            document.getElementById('chess').classList.remove('active');
+            document.getElementById('trans2').classList.add('active');
+          }, 2200);
+        } else {
+          showBigDialog('لا يا بعدي... فكري مرة ثانية 💕', false);
+        }
+      } else {
+        if (it.id === order[step]) {
+          showBigDialog('صح عليك! 😼✨', true);
+          step++;
+          setTimeout(() => {
+            document.getElementById('big-dialog').classList.remove('show');
+            renderChess();
+          }, 1100);
+        } else {
+          const wrongs = [
+            'هذي مو هي يا ذكية 😭',
+            'قرّبي... بس لسة مو صح 😂',
+            'لاااا، جربي ثانية 💗',
+            'وش هالاختيار؟ 😹',
+            'حاولّي مرة ثانية يا قندس'
+          ];
+          showBigDialog(wrongs[Math.floor(Math.random()*wrongs.length)], false);
+        }
+      }
+    };
+    g.appendChild(d);
+  });
+}
+
+// ====================== QUIZ (RANDOM + BETTER WRONG NOTES) ======================
+const quizData = [
+  { intro: 'سهل... لا تتحمسين 😂', qs: [
+    { 
+      q: 'لو رمزي كان جوعان وشاف قندس، وش تتوقعين بيسوي؟', 
+      opts: [
+        {text: 'ياكل قندس 😂', correct: true, note: 'هههه صح! رمزي جوعان دائمًا على قندس 😭'},
+        {text: 'يطعمها 🍽️', correct: false, note: 'لا يا بعدي، رمزي مو بهاللطافة هههه'},
+        {text: 'يطلب منها أكل 🥺', correct: false, note: 'قريب... بس هو أجوع من كذا'},
+        {text: 'ينام 😴', correct: false, note: 'لا، الجوع أقوى من النوم عنده'}
+      ]
+    },
+    { 
+      q: 'وش أكثر شي يعجب رمزي في شكل قندس؟', 
+      opts: [
+        {text: 'رجولج 🦶', correct: true, note: 'إيييه! هذي الإجابة الصح 😭\nأمزح معج 😂 عيونج وشفايفج... وجسمج بعد.'},
+        {text: 'عيونج 👀', correct: false, note: 'عيونج حلوة بس في شيء أحلى كمان'},
+        {text: 'شعر ج 💇‍♀️', correct: false, note: 'شعرج جميل، بس مو الأكثر'},
+        {text: 'ضحكتج 😊', correct: false, note: 'ضحكتج تسعدني، بس الجواب الثاني'}
+      ]
+    }
+  ]},
+  { intro: 'أوكي... للحين ما خربتيها 😂', qs: [
+    { 
+      q: 'أفضل شيء يسويه رمزي مع قندس؟', 
+      opts: [
+        {text: 'الحضن + البقاء معها + الشطرنج + السهر ❤️', correct: true, note: 'صح عليك... هذي حياتنا ❤️'},
+        {text: 'اللعب بس 🎮', correct: false, note: 'اللعب حلو، بس في أشياء أحلى بكثير'},
+        {text: 'الأكل 🍕', correct: false, note: 'الأكل مهم، بس مو الأفضل'},
+        {text: 'النوم 😴', correct: false, note: 'النوم حلو بعد السهر معج'}
+      ]
+    },
+    { 
+      q: 'مشروب قندس المفضل؟', 
+      opts: [
+        {text: 'Matcha 🍵', correct: true, note: 'صح! الماتشا حق قندس 🍵'},
+        {text: 'قهوة ☕', correct: false, note: 'قهوة حلوة، بس قندس تحب الماتشا أكثر'},
+        {text: 'عصير 🧃', correct: false, note: 'عصير طيب، بس مو المفضل'},
+        {text: 'ماي 💧', correct: false, note: 'الماي مهم، بس في مشروب أحلى'}
+      ]
+    }
+  ]},
+  { intro: 'الحين أبي أشوف إذا تعرفيني صدق.', qs: [
+    { 
+      q: 'مشروب رمزي المفضل؟', 
+      opts: [
+        {text: 'Lemonade 🍋', correct: true, note: 'صح! الليمونادة 🍋'},
+        {text: 'قهوة ☕', correct: false, note: 'قهوة حلوة، بس أنا أحب الليمونادة أكثر'},
+        {text: 'شاي 🍵', correct: false, note: 'الشاي طيب، بس مو المفضل عندي'},
+        {text: 'كولا 🥤', correct: false, note: 'كولا؟ لا يا قندس هههه'}
+      ]
+    },
+    { 
+      q: 'وش الشي اللي يخلي رمزي مميز؟', 
+      opts: [
+        {text: 'وجهه كأنه معصب دائمًا 😼', correct: true, note: 'صح... وجهي دايمًا معصب بس قلبي لج 😭'},
+        {text: 'لما يعصب 😠', correct: false, note: 'مو لما أعصب، أنا أصلًا شكلي معصب'},
+        {text: 'ضحكتها 😂', correct: false, note: 'ضحكي موجودة بس مو الشيء المميز'},
+        {text: 'صوته 🔊', correct: false, note: 'صوتي عادي، في شيء أوضح'}
+      ]
+    }
+  ]},
+  { intro: 'آخر مستوى... ركزي زين.<br>هنا ما عاد ينفع التخمين.', qs: [
+    { 
+      q: 'الشخص المفضل عند رمزي؟', 
+      opts: [
+        {text: 'قندس ❤️', correct: true, note: 'صح... وأنتي بس ❤️'},
+        {text: 'أهله 👨‍👩‍👧', correct: false, note: 'أهلي غاليين، بس في شخص أغلى'},
+        {text: 'أصدقاءه 👥', correct: false, note: 'الأصدقاء حلوين، بس مو المفضل'},
+        {text: 'نفسه 🪞', correct: false, note: 'أنا أحب نفسي، بس أحبك أكثر'}
+      ]
+    },
+    { 
+      q: 'الشيء اللي يكرهه رمزي؟', 
+      opts: [
+        {text: 'لكحالش 😤', correct: true, note: 'صح والله 😭'},
+        {text: 'الصباح 🌅', correct: false, note: 'الصباح مزعج أحيانًا، بس في شيء أكرهه أكثر'},
+        {text: 'الزحمة 🚗', correct: false, note: 'الزحمة متعبة، بس مو هذي'},
+        {text: 'الكذب 🤥', correct: false, note: 'الكذب سيء، بس الجواب الثاني'}
+      ]
+    },
+    { 
+      q: 'الشيء المميز في قندس؟', 
+      opts: [
+        {text: 'جلفاويتها + كسلها كمزحة + نعومتها وأنوثتها 💕', correct: true, note: 'صح... كل هالصفات مع بعض ❤️'},
+        {text: 'ذكائها بس 🧠', correct: false, note: 'هي ذكية جدًا، بس في شيء أحلى كمان'},
+        {text: 'جمالها بس ✨', correct: false, note: 'جمالها واضح، بس مو بس كذا'},
+        {text: 'ضحكتها بس 😊', correct: false, note: 'ضحكتها تسعدني، بس في أكثر من كذا'}
+      ]
+    },
+    { 
+      q: 'من الأكثر سهرًا؟', 
+      opts: [
+        {text: 'رمزي 🐈‍⬛', correct: true, note: 'صح... أنا أسهر أكثر 🐈‍⬛'},
+        {text: 'قندس 🐰', correct: false, note: 'قندس تسهر، بس أنا أكثر'},
+        {text: 'الاثنين 👯‍♂️', correct: false, note: 'أحيانًا مع بعض، بس أنا أكثر'},
+        {text: 'لا أحد 💤', correct: false, note: 'لا، في أحد يسهر كثير'}
+      ]
+    },
+    { 
+      q: 'من الأكثر عنادًا؟', 
+      opts: [
+        {text: 'لا أحد ❤️', correct: true, note: 'صح... ما في عناد بيننا ❤️'},
+        {text: 'رمزي 🐈‍⬛', correct: false, note: 'أنا مو عنيد معج'},
+        {text: 'قندس 🐰', correct: false, note: 'قندس مو عنيدة معي'},
+        {text: 'الاثنين 😤', correct: false, note: 'لا، إحنا متفاهمين'}
+      ]
+    },
+    { 
+      q: 'وش يحب رمزي يستلم من قندس؟', 
+      opts: [
+        {text: 'رسائلها + صورها 💌', correct: true, note: 'صح... رسالج وصورج أسعد شي 💌'},
+        {text: 'هدايا 🎁', correct: false, note: 'الهدايا حلوة، بس في شيء أسعد'},
+        {text: 'أكل 🍪', correct: false, note: 'الأكل طيب، بس مو المفضل'},
+        {text: 'ملابس 👕', correct: false, note: 'ملابس؟ لا يا قندس هههه'}
+      ]
+    }
+  ]}
+];
+
+let qLvl = 0, qIdx = 0;
+
+function startQuiz() {
+  document.getElementById('trans2').classList.remove('active');
+  qLvl = 0; showIntro();
+}
+function showIntro() {
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('q-intro').classList.add('active');
+  document.getElementById('q-intro-text').innerHTML = quizData[qLvl].intro;
+}
+function beginLevel() {
+  document.getElementById('q-intro').classList.remove('active');
+  document.getElementById('quiz').classList.add('active');
+  qIdx = 0; showQ();
+}
+
+function showQ() {
+  const d = quizData[qLvl].qs[qIdx];
+  document.getElementById('q-prog').textContent = `المستوى ${qLvl+1} — سؤال ${qIdx+1} من ${quizData[qLvl].qs.length}`;
+  document.getElementById('q-text').textContent = d.q;
+  document.getElementById('q-comment').classList.remove('show');
+  document.getElementById('q-next').style.display = 'none';
+
+  // Shuffle options
+  const shuffled = [...d.opts].sort(() => Math.random() - 0.5);
+
+  const box = document.getElementById('q-opts');
+  box.innerHTML = '';
+
+  shuffled.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = opt.text;
+    div.onclick = () => {
+      const cmt = document.getElementById('q-comment');
+      cmt.textContent = opt.note;
+      cmt.classList.add('show');
+
+      if (opt.correct) {
+        // correct → show Next and lock options
+        document.getElementById('q-next').style.display = 'inline-block';
+        box.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
+      }
+      // if wrong → just show the note, she can try again
+    };
+    box.appendChild(div);
+  });
+}
+
+function nextQ() {
+  qIdx++;
+  if (qIdx >= quizData[qLvl].qs.length) {
+    qLvl++;
+    if (qLvl >= quizData.length) {
+      document.getElementById('quiz').classList.remove('active');
+      startHearts();
+    } else showIntro();
+  } else showQ();
+}
+
+function startHearts() {
+  document.getElementById('hearts').classList.add('active');
+  let n = 0;
+  const field = document.getElementById('h-field');
+  field.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const h = document.createElement('div');
+    h.className = 'floating-heart'; h.textContent = '❤️';
+    h.style.left = (7 + Math.random()*86) + '%';
+    h.style.top = (6 + Math.random()*78) + '%';
+    h.style.animationDelay = (Math.random()*2) + 's';
+    h.onclick = function() {
+      this.style.opacity = '0'; this.style.transform = 'scale(1.7)';
+      setTimeout(() => this.remove(), 300);
+      n++; document.getElementById('h-count').textContent = `قلوب: ${n} / 10`;
+      if (n >= 10) setTimeout(() => {
+        document.getElementById('hearts').classList.remove('active');
+        document.getElementById('final').classList.add('active');
+      }, 700);
+    };
+    field.appendChild(h);
+  }
+}
+</script>
+</body>
+</html>
