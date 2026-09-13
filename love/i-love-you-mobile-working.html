@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لدعسوقتي ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Pacifico&family=Indie+Flower&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffc0cb, #ff69b4, #ffb6c1, #ff1493);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Cairo', 'Indie Flower', cursive;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            animation: floatHeart 9s linear infinite;
+            opacity: 0.65;
+            pointer-events: none;
+            user-select: none;
+            z-index: 1;
+        }
+
+        .click-heart {
+            position: fixed;
+            z-index: 50;
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            font-size: 36px;
+            line-height: 1;
+            opacity: 0;
+            filter: drop-shadow(0 3px 8px rgba(90, 40, 130, 0.35));
+            animation: floatForeground 8s linear forwards;
+        }
+
+        .click-heart:active {
+            transform: scale(1.25);
+        }
+
+        @keyframes floatForeground {
+            0%   { transform: translateY(110vh) rotate(-10deg) scale(0.8); opacity: 0; }
+            10%  { opacity: 0.95; }
+            50%  { transform: translateY(45vh) rotate(8deg) scale(1); }
+            90%  { opacity: 0.95; }
+            100% { transform: translateY(-15vh) rotate(-8deg) scale(0.9); opacity: 0; }
+        }
+
+        .cute-word {
+            position: fixed;
+            z-index: 60;
+            pointer-events: none;
+            font-family: 'Cairo', cursive;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(90, 40, 130, 0.65);
+            white-space: nowrap;
+            animation: wordRise 2.5s ease-out forwards;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes wordRise {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -40%) scale(0.45);
+            }
+            12% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -190%) scale(0.72);
+            }
+        }
+
+        .burst-heart {
+            position: fixed;
+            z-index: 55;
+            pointer-events: none;
+            font-size: 18px;
+            animation: burst 0.9s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) scale(1.2);
+            }
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .vertical-scroll {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+        }
+
+        .words-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            will-change: transform;
+        }
+
+        .word {
+            font-size: 2.3rem;
+            color: #fff;
+            text-shadow: 2px 2px 8px rgba(199, 21, 133, 0.75);
+            margin: 18px 0;
+            font-weight: 700;
+            font-family: 'Indie Flower', 'Cairo', cursive;
+            white-space: nowrap;
+            opacity: 0.95;
+            line-height: 1.3;
+        }
+
+        .special {
+            font-size: 2.7rem;
+            background: rgba(255, 255, 255, 0.22);
+            padding: 10px 30px;
+            border-radius: 40px;
+            border: 2px solid rgba(255,255,255,0.75);
+            text-shadow: 0 0 14px #ff69b4, 2px 2px 6px rgba(0,0,0,0.2);
+            margin: 24px 0;
+        }
+
+        .fade-top, .fade-bottom {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 130px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .fade-top {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(255,105,180,0.9), transparent);
+        }
+
+        .fade-bottom {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(255,105,180,0.9), transparent);
+        }
+
+        .top-title {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 4;
+            font-family: 'Pacifico', cursive;
+            font-size: 1.7rem;
+            color: #fff;
+            text-shadow: 2px 2px 6px rgba(255,20,147,0.6);
+            opacity: 0.95;
+        }
+
+        @media (max-width: 600px) {
+            .word { font-size: 1.6rem; margin: 13px 0; }
+            .special { font-size: 1.9rem; padding: 8px 22px; }
+            .top-title { font-size: 1.35rem; }
+
+            .click-heart {
+                font-size: 34px;
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .cute-word {
+                max-width: 88vw;
+                white-space: normal;
+                text-align: center;
+                font-size: 1.05rem;
+                line-height: 1.45;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-container" id="hearts"></div>
+
+    <div class="top-title">💕 لدعسوقتي 💕</div>
+
+    <div class="fade-top"></div>
+    <div class="fade-bottom"></div>
+
+    <div class="vertical-scroll">
+        <div class="words-column" id="column"></div>
+    </div>
+
+    <script>
+        // 50 languages (no heart emojis)
+        const phrases = [
+            "نبغيك", "نشتيك", "أحبك", "بحبك",
+            "I love you", "Je t'aime", "Te quiero", "Te amo",
+            "Ti amo", "Eu te amo", "Ich liebe dich",
+            "Я тебя люблю", "我爱你", "愛してる", "사랑해",
+            "Seni seviyorum", "मैं तुमसे प्यार करता हूँ",
+            "Σ' αγαπώ", "Kocham cię", "Ik hou van jou",
+            "Jag älskar dig", "Rakastan sinua", "Miluji tě",
+            "Te iubesc", "אני אוהב אותך", "ฉันรักเธอ",
+            "Anh yêu em", "Aku cinta kamu", "Mahal kita",
+            "Saya sayang awak", "Ek is lief vir jou", "Jeg elsker dig",
+            "Ég elska þig", "Volim te", "Ljubim te",
+            "Szeretlek", "Mina armastan sind", "Aš tave myliu",
+            "Es tevi mīlu", "Tá grá agam duit", "Je t'adore",
+            "Wǒ ài nǐ", "Aishiteru", "Saranghae",
+            "Main tumse pyar karta hoon", "Ngo oi nei",
+            "Phom rak khun", "Iniibig kita", "Aku sayang kamu",
+            "I love u"
+        ];
+
+        const specials = ["نبغيك", "نشتيك", "أحبك", "بحبك"];
+
+        // Generate a long sequence where no word repeats until at least 20 others have passed
+        function generateSequence(length = 400) {
+            const sequence = [];
+            const lastSeen = {}; // phrase -> last index it appeared
+
+            // Shuffle helper
+            function shuffle(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            let candidates = shuffle(phrases);
+
+            while (sequence.length < length) {
+                let placed = false;
+
+                // Try to place a candidate that respects the 20-gap rule
+                for (let i = 0; i < candidates.length; i++) {
+                    const p = candidates[i];
+                    const last = lastSeen[p];
+                    if (last === undefined || (sequence.length - last) > 20) {
+                        sequence.push(p);
+                        lastSeen[p] = sequence.length - 1;
+                        // Move used phrase to end for better randomness
+                        candidates.splice(i, 1);
+                        candidates.push(p);
+                        placed = true;
+                        break;
+                    }
+                }
+
+                // Fallback: if somehow stuck, force the oldest one
+                if (!placed) {
+                    let oldest = null;
+                    let oldestIdx = Infinity;
+                    for (const p of phrases) {
+                        const idx = lastSeen[p] ?? -999;
+                        if (idx < oldestIdx) {
+                            oldestIdx = idx;
+                            oldest = p;
+                        }
+                    }
+                    sequence.push(oldest);
+                    lastSeen[oldest] = sequence.length - 1;
+                }
+            }
+            return sequence;
+        }
+
+        const column = document.getElementById('column');
+        const sequence = generateSequence(420); // long enough for smooth loop
+
+        function buildHTML(seq) {
+            return seq.map(p => {
+                const isSpecial = specials.includes(p);
+                return `<div class="word ${isSpecial ? 'special' : ''}">${p}</div>`;
+            }).join('');
+        }
+
+        // Duplicate the whole sequence for seamless infinite loop
+        column.innerHTML = buildHTML(sequence) + buildHTML(sequence);
+
+        function startSmoothScroll() {
+            requestAnimationFrame(() => {
+                const totalHeight = column.scrollHeight;
+                const halfHeight = totalHeight / 2;
+
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes scrollUpSmooth {
+                        0% { transform: translateY(0); }
+                        100% { transform: translateY(-${halfHeight}px); }
+                    }
+                    .words-column {
+                        animation: scrollUpSmooth 450s linear infinite;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+        }
+
+        startSmoothScroll();
+
+        // Decorative background hearts (not clickable).
+        const heartsContainer = document.getElementById('hearts');
+        const heartEmojis = ['❤️', '💕', '💖', '💗', '💓', '💞', '💝', '🩷', '💘'];
+
+        // Arabic phrases shown when a foreground heart is tapped/clicked.
+        const cuteWords = [
+            "شعركِ جميل",
+            "ابتسامتكِ تجنن",
+            "عيونكِ جميلة",
+            "أنتِ كيوت",
+            "أنتِ جميلة جدًا",
+            "ضحكتكِ تجنن",
+            "أنتِ أحلى شيء",
+            "أحب طريقتكِ",
+            "أنتِ مميزة",
+            "وجودكِ يسعدني",
+            "أنتِ لطيفة جدًا",
+            "أحب عفويتكِ",
+            "أحب كلامكِ",
+            "أحب ضحكتكِ",
+            "أنتِ قمر",
+            "أنتِ تجنن",
+            "أنتِ سبب ابتسامتي",
+            "أنتِ قطعة من السعادة",
+            "أحب تفاصيلكِ الصغيرة",
+            "أنتِ أجمل صدفة",
+            "شواربك عسل",
+            "شعرك حرير",
+            "غبية",
+            "بوالة",
+            "رقبتك مغرية",
+            "كحلوشة",
+            "عيونك تخبل",
+            "وجهك يفتح النفس",
+            "ضحكتك تقتلني",
+            "صوتك يجنن",
+            "نظرتك خطيرة",
+            "يا زينك",
+            "يا جمالك",
+            "يا حلوك",
+            "أحب هبالك",
+            "أحب شقاوتك",
+            "قلبك عسل",
+            "روحك حلوة",
+            "أنتِ فخمة",
+            "أنتِ سكر",
+            "أنتِ عسولة",
+            "يا محلاك",
+            "يا بعد قلبي"
+        ];
+
+        const foregroundHearts = ['💜', '🩷', '💗', '💖', '💘', '💞'];
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+            heart.style.animationDuration = (Math.random() * 7 + 7) + 's';
+            heart.style.animationDelay = Math.random() * 3 + 's';
+            heartsContainer.appendChild(heart);
+            setTimeout(() => heart.remove(), 14000);
+        }
+
+        function burstHearts(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const b = document.createElement('div');
+                b.className = 'burst-heart';
+                b.textContent = ['💜', '🩷', '💗'][i % 3];
+                b.style.left = x + 'px';
+                b.style.top = y + 'px';
+
+                const angle = (Math.PI * 2 * i / 8) + Math.random() * 0.3;
+                const distance = 35 + Math.random() * 55;
+                b.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                b.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+
+                document.body.appendChild(b);
+                setTimeout(() => b.remove(), 950);
+            }
+        }
+
+        function showCuteWord(x, y) {
+            const word = document.createElement('div');
+            word.className = 'cute-word';
+            word.textContent = cuteWords[Math.floor(Math.random() * cuteWords.length)];
+            word.style.left = x + 'px';
+            word.style.top = y + 'px';
+
+            document.body.appendChild(word);
+            burstHearts(x, y);
+            setTimeout(() => word.remove(), 2500);
+        }
+
+        function createClickableHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'click-heart';
+            heart.textContent = foregroundHearts[
+                Math.floor(Math.random() * foregroundHearts.length)
+            ];
+
+            heart.style.left = (Math.random() * 84 + 8) + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 7) + 's';
+
+            let activated = false;
+
+            function activate(event) {
+                if (activated) return;
+                activated = true;
+
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const rect = heart.getBoundingClientRect();
+                showCuteWord(
+                    rect.left + rect.width / 2,
+                    rect.top + rect.height / 2
+                );
+
+                heart.remove();
+            }
+
+            // Desktop mouse click.
+            heart.addEventListener('click', activate, { passive: false });
+
+            // Phones/tablets.
+            heart.addEventListener('touchend', activate, { passive: false });
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                if (heart.isConnected) heart.remove();
+            }, 11000);
+        }
+
+        // Background decoration.
+        setInterval(createHeart, 420);
+        for (let i = 0; i < 14; i++) {
+            setTimeout(createHeart, i * 200);
+        }
+
+        // Interactive foreground hearts.
+        setInterval(createClickableHeart, 1200);
+        for (let i = 0; i < 6; i++) {
+            setTimeout(createClickableHeart, i * 500);
+        }
+    </script>
+</body>
+</html>
